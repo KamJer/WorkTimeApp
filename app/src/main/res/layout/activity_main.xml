@@ -5,20 +5,40 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Naciśni Start aby rozpocząć pracę"
+        android:textStyle="bold"
+        android:textSize="18dp"
+        android:layout_above="@id/beginningOfWork_TextView"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/beginningOfWork_TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Początek pracy"
+        android:textStyle="bold"
+        android:textSize="18dp"
+        android:layout_above="@id/endOfWork_TextView"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/endOfWork_TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Koniec pracy"
+        android:textStyle="bold"
+        android:textSize="18dp"
+        android:layout_above="@id/start_button"
+        android:layout_centerHorizontal="true"/>
+
     <Button
         android:id="@+id/start_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
-
-    <TextView
-        android:id="@+id/empty_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Test"
-        android:textStyle="bold"
-        android:textSize="18dp"
-        android:layout_above="@id/start_button"
-        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>

@@ -13,11 +13,14 @@ import retrofit2.http.Path;
 
 public interface CzasPracyApi {
     @GET("/czas-pracy/get-not-ended-czasPracy/{pracownikId}")
-    Call<CzasPracy> getCzasPracy(@Path(value = "pracownikId") Long pracownikId);
+    Call<CzasPracy> getNotEndedCzasPracy(@Path(value = "pracownikId") Long pracownikId);
 
     @POST("/czas-pracy/post")
     Call<Boolean> postCzasPracy(@Body CzasPracy CzasPracy);
 
     @GET("/czas-pracy/get-new-czasPracy/{pracownikId}")
-    Call<Response<CzasPracy>> getNewCzasPracy(@Path(value = "pracownikId") Long pracownikId);
+    Call<CzasPracy> getNewCzasPracy(@Path(value = "pracownikId") Long pracownikId);
+
+    @GET("/czas-pracy/get-not-ended-czasPracy-and-end-it/{pracownikId}")
+    Call<CzasPracy> getNotEndedCzasPracyAndEndIt(@Path(value = "pracownikId") Long pracownikId);
 }
