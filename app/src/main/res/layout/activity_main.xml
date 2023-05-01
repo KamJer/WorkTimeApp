@@ -5,6 +5,16 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <Button
+        android:id="@+id/settings_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="10dp"
+        android:text="U"
+        android:onClick="openSettingsActivity"/>
+
     <TextView
         android:id="@+id/label_textview"
         android:layout_width="wrap_content"

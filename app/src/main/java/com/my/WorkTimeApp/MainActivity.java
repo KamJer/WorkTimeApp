@@ -2,8 +2,10 @@ package com.my.WorkTimeApp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -24,6 +26,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+//TODO: change name this one is for development only
 public class MainActivity extends AppCompatActivity {
     private TextView startTime;
     private TextView endTime;
@@ -38,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private Boolean clicked = false;
 
     //    for testing
-    private long pracownikId = 1;
+    private final long  pracownikId = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,18 +58,16 @@ public class MainActivity extends AppCompatActivity {
         beginingOfWorkLabel = "Początek pracy";
         endOfWorkLabel = "Koniec Pracy";
 
-        Log.d("OnStart", "starytuje");
-
         RetrofitService retrofitService = new RetrofitService();
-        PracownikApi pracownikApi = retrofitService.getRetrofit().create(PracownikApi.class);
         CzasPracyApi czasPracyApi = retrofitService.getRetrofit().create(CzasPracyApi.class);
 
 //        loading notEndedCzasPracy
-//        TODO:getNotEndedCzasPracy sets ending czas pracy in a data base so by asking server for this info you are ending a shift
         czasPracyApi.getNotEndedCzasPracy(pracownikId).enqueue(new Callback<CzasPracy>() {
 
             @Override
             public void onResponse(Call<CzasPracy> call, Response<CzasPracy> response) {
+//                TODO: when error, or somthing went wrong inform user with toast
+//                if a body of a response is null no data was found
                 if (response.body() != null){
                     clicked = true;
                     LocalDateTime dateTimeBeginning = response.body().getBeginningOfWork();
@@ -76,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<CzasPracy> call, Throwable t) {
+                public void onFailure(Call<CzasPracy> call, Throwable t) {
+//                TODO: when error, or somthing went wrong inform user with toast
                 Log.d("OnFirstLoad", t.getMessage());
             }
         });
@@ -154,4 +156,10 @@ public class MainActivity extends AppCompatActivity {
         dateTimeString += ":" + Integer.toString(dateTime.getMinute());
         return dateTimeString;
     }
+
+    public void openSettingsActivity(View view) {
+        Intent intent = new Intent(this, EmployeeSettingsActivity.class);
+        startActivity(intent);
+    }
+
 }
