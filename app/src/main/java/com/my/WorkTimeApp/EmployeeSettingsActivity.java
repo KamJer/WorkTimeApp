@@ -16,6 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.gson.Gson;
 import com.my.WorkTimeApp.entity.Pracownik;
+import com.my.WorkTimeApp.fileUtil.FileUtil;
 import com.my.WorkTimeApp.retrofit.RetrofitService;
 import com.my.WorkTimeApp.retrofit.api.PracownikApi;
 
@@ -42,7 +43,8 @@ public class EmployeeSettingsActivity extends AppCompatActivity {
 
     private String fileName = "pracownik_name.json";
     ArrayAdapter<Pracownik> pracownikSpinnerAdapter;
-    List<Pracownik> employees = new ArrayList<>();
+    List<Pracownik> employees;
+    private Pracownik savedPracownik;
 
     private Toast errorToast;
 
@@ -63,12 +65,6 @@ public class EmployeeSettingsActivity extends AppCompatActivity {
 
         RetrofitService retrofitService = new RetrofitService();
         PracownikApi pracownikApi = retrofitService.getRetrofit().create(PracownikApi.class);
-//
-//        pracownikSpinnerAdapter = new ArrayAdapter<Pracownik>(EmployeeSettingsActivity.this, R.layout.support_simple_spinner_dropdown_item, employees);
-//        String pracownik = readFromFile();
-        Pracownik savedPracownik = readFromFile();
-        Log.d(EmployeeSettingsActivity.class.getName(), savedPracownik.toString());
-
 
         pracownikApi.getAllPracownicy().enqueue(new Callback<List<Pracownik>>() {
             @Override
@@ -76,8 +72,12 @@ public class EmployeeSettingsActivity extends AppCompatActivity {
                 Log.d("OnEmployeeLoad", String.valueOf(response.code()));
                 if (response.body() != null) {
                     employees = response.body();
-                    pracownikSpinnerAdapter = new ArrayAdapter<Pracownik>(EmployeeSettingsActivity.this, R.layout.support_simple_spinner_dropdown_item, employees);
-                    pracownikSpinner.setAdapter(pracownikSpinnerAdapter);
+                    makeAdapterAndAddAdapter(pracownikSpinner, employees);
+                    savedPracownik = FileUtil.readFromFile(EmployeeSettingsActivity.this, gson, fileName);
+                    if (savedPracownik != null) {
+                        int indexInSpinner = findInSpinnerId(pracownikSpinner, savedPracownik);
+                        pracownikSpinner.setSelection(indexInSpinner);
+                    }
                 } else {
                     errorToast.setDuration(Toast.LENGTH_LONG);
                     errorToast.setText("Htpp code: " + response.code());
@@ -90,6 +90,7 @@ public class EmployeeSettingsActivity extends AppCompatActivity {
                 Log.d(EmployeeSettingsActivity.class.getName(), t.getMessage());
             }
         });
+
 
 
         pracownikSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -127,45 +128,27 @@ public class EmployeeSettingsActivity extends AppCompatActivity {
     }
 
     private void onSaveButton(PracownikApi pracownikApi) {
-        saveToFile(((Pracownik) pracownikSpinner.getSelectedItem()));
+        FileUtil.saveToFile(this, gson, fileName, ((Pracownik) pracownikSpinner.getSelectedItem()));
     }
 
-    public void saveToFile(Pracownik content) {
-        try {
-
-            FileWriter writer = new FileWriter(getApplicationContext().getFilesDir() + "/" + fileName);
-            gson.toJson(content, writer);
-//            writer.write(content.forSave());
-//            writer.close();
-            Log.d(EmployeeSettingsActivity.class.getName(), (getApplicationContext().getFilesDir().getPath()));
-        } catch (IOException e) {
-            Log.d(EmployeeSettingsActivity.class.getName(), e.getMessage());
+    /**
+     * looks for an pracownik in a spinner that is the same with a passed pracownik
+     * @param spinner in witch a employee is looked for
+     * @param pracownikToFind
+     * @return index in a spinner for passed employee, -1 if there is no match
+     */
+    private int findInSpinnerId(Spinner spinner, Pracownik pracownikToFind) {
+        for (int i = 0; i < spinner.getAdapter().getCount(); i++) {
+            Pracownik pracownik = (Pracownik) spinner.getAdapter().getItem(i);
+            if (pracownik.equals(pracownikToFind)){
+                return i;
+            }
         }
+        return -1;
     }
 
-    private Pracownik readFromFile() {
-        try {
-            Reader reader = Files.newBufferedReader(Paths.get(getApplicationContext().getFilesDir() + "/" + fileName));
-            Pracownik pracownik = gson.fromJson(reader, Pracownik.class);
-            Log.d(EmployeeSettingsActivity.class.getName(), "wybór");
-            return pracownik;
-//            File file = new File(getApplicationContext().getFilesDir(), fileName);
-//            FileInputStream inputStream = new FileInputStream(file);
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-//            StringBuilder stringBuilder = new StringBuilder();
-//            String line;
-//            while ((line = reader.readLine()) != null) {
-//                stringBuilder.append(line).append(" ");
-//            }
-//            reader.close();
-//            inputStream.close();
-//            readFile = stringBuilder.toString();
-//            return stringBuilder.toString();
-        } catch (IOException e) {
-            Log.d(MainActivity.class.getName(), e.getMessage());
-            errorToast.setText(e.getMessage());
-            errorToast.show();
-        }
-        return null;
+    private void makeAdapterAndAddAdapter(Spinner spinner, List<Pracownik> elements) {
+        ArrayAdapter<Pracownik> adapter = new ArrayAdapter<Pracownik>(EmployeeSettingsActivity.this, R.layout.support_simple_spinner_dropdown_item, elements);
+        spinner.setAdapter(adapter);
     }
 }
