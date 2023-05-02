@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private Button startButton;
     private String startButtonText;
     private String stopButtonText;
+    private String beginningOfWorkLabel;
     private String endOfWorkLabel;
 
 //    flags and intents
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private Gson gson = new Gson();
     private CzasPracyApi czasPracyApi;
 
-    private Toast errorToast;
+//    private Toast errorToast;
 
 //    active employee
     private Pracownik activeEmployee;
@@ -56,8 +57,7 @@ public class MainActivity extends AppCompatActivity {
         startButtonText = "Start";
         stopButtonText = "Stop";
         endOfWorkLabel = "Koniec Pracy";
-
-        errorToast = new Toast(this);
+        beginningOfWorkLabel = "Początek Pracy";
 
         RetrofitService retrofitService = new RetrofitService();
         czasPracyApi = retrofitService.getRetrofit().create(CzasPracyApi.class);
@@ -88,11 +88,13 @@ public class MainActivity extends AppCompatActivity {
      * @param czasPracyApi
      */
     private void loadData(CzasPracyApi czasPracyApi) {
+        startTime.setText(beginningOfWorkLabel);
+        endTime.setText(endOfWorkLabel);
+
         czasPracyApi.getNotEndedCzasPracy(activeEmployee.getId()).enqueue(new Callback<CzasPracy>() {
 
             @Override
             public void onResponse(Call<CzasPracy> call, Response<CzasPracy> response) {
-//                TODO: when error, or somthing went wrong inform user with toast
 //                if a body of a response is null no data was found
                 if (response.body() != null) {
                     clicked = true;
@@ -102,19 +104,14 @@ public class MainActivity extends AppCompatActivity {
                     startButton.setText(stopButtonText);
                 } else {
 //                    code 404 can be returned when there is something wrong but it can also be returned when all shifts are ended
-                    errorToast.setDuration(Toast.LENGTH_LONG);
-                    errorToast.setText("Htpp code: " + response.code());
-                    errorToast.show();
+                    makeToast("Http: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<CzasPracy> call, Throwable t) {
-//                TODO: when error, or somthing went wrong inform user with toast
                 Log.d(MainActivity.class.getName(), t.getMessage());
-                errorToast.setDuration(Toast.LENGTH_LONG);
-                errorToast.setText(t.getMessage());
-                errorToast.show();
+                makeToast(t.getMessage());
             }
         });
     }
@@ -145,18 +142,14 @@ public class MainActivity extends AppCompatActivity {
                     startTime.setText(getTime(dateTime));
                     endTime.setText(endOfWorkLabel);
                 } else {
-                    errorToast.setDuration(Toast.LENGTH_LONG);
-                    errorToast.setText("Htpp code: " + response.code());
-                    errorToast.show();
+                    makeToast("Http: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<CzasPracy> call, Throwable t) {
                 Log.d(MainActivity.class.getName(), t.getMessage());
-                errorToast.setDuration(Toast.LENGTH_LONG);
-                errorToast.setText(t.getMessage());
-                errorToast.show();
+                makeToast(t.getMessage());
             }
         });
     }
@@ -181,18 +174,14 @@ public class MainActivity extends AppCompatActivity {
                     LocalDateTime endOfWork = czasPracyEmployeeJustEnded.getEndOfWork();
                     endTime.setText(getTime(endOfWork));
                 } else {
-                    errorToast.setDuration(Toast.LENGTH_LONG);
-                    errorToast.setText("Htpp code: " + response.code());
-                    errorToast.show();
+                    makeToast("Http: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<CzasPracy> call, Throwable t) {
                 Log.d(MainActivity.class.getName(), t.getMessage());
-                errorToast.setDuration(Toast.LENGTH_LONG);
-                errorToast.setText(t.getMessage());
-                errorToast.show();
+                makeToast(t.getMessage());
             }
         });
     }
@@ -215,6 +204,10 @@ public class MainActivity extends AppCompatActivity {
      */
     public void openSettingsActivity(View view) {
         startActivity(settingsIntent);
+    }
+
+    private void makeToast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
     @Override

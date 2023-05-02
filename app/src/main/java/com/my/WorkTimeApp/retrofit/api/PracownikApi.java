@@ -13,12 +13,6 @@ public interface PracownikApi {
     @GET("/pracownicy/get")
     Call<List<Pracownik>> getAllPracownicy();
 
-    @GET("/pracownicy/{id}")
-    Call<List<Pracownik>> getPRacownikById(@Path(value = "id") Long id);
-
-    @POST("/pracownicy/post")
-    Call<Pracownik> postPracownik(@Body Pracownik pracownik);
-
-    @DELETE("/api/pracownicy/delete/{id}")
-    Call<Void> deletePracownik (@Path(value ="id") Long id);
+    @GET("/pracownicy/get/{id}")
+    Call<List<Pracownik>> getPracownikById(@Path(value = "id") Long id);
 }
