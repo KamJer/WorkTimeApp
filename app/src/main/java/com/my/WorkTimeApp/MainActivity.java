@@ -11,10 +11,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.my.WorkTimeApp.entity.CzasPracy;
-import com.my.WorkTimeApp.entity.Pracownik;
+import com.my.WorkTimeApp.entity.WorkTime;
+import com.my.WorkTimeApp.entity.Employee;
 import com.my.WorkTimeApp.fileUtil.FileUtil;
-import com.my.WorkTimeApp.retrofit.api.CzasPracyApi;
+import com.my.WorkTimeApp.retrofit.api.WorkTimeApi;
 import com.my.WorkTimeApp.retrofit.RetrofitService;
 
 import java.time.LocalDateTime;
@@ -38,12 +38,12 @@ public class MainActivity extends AppCompatActivity {
     private Boolean clicked = false;
     private Intent settingsIntent;
     private Gson gson = new Gson();
-    private CzasPracyApi czasPracyApi;
+    private WorkTimeApi workTimeApi;
 
 //    private Toast errorToast;
 
 //    active employee
-    private Pracownik activeEmployee;
+    private Employee activeEmployee;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,15 +60,15 @@ public class MainActivity extends AppCompatActivity {
         beginningOfWorkLabel = "Początek Pracy";
 
         RetrofitService retrofitService = new RetrofitService();
-        czasPracyApi = retrofitService.getRetrofit().create(CzasPracyApi.class);
+        workTimeApi = retrofitService.getRetrofit().create(WorkTimeApi.class);
 //        setting text for the button
         startButton.setText(startButtonText);
 //        setting behavior
         startButton.setOnClickListener(v -> {
             if (!clicked) { // if button is not started
-                onStartAction(czasPracyApi);
+                onStartAction(workTimeApi);
             } else {        // if button is started
-                onStopAction(czasPracyApi);
+                onStopAction(workTimeApi);
             }
         });
 //      initializing intent and loading active employee from file, if such employee (it's first time app is running or for some reason file was deleted)
@@ -78,23 +78,23 @@ public class MainActivity extends AppCompatActivity {
         if (activeEmployee == null) {
             startActivity(settingsIntent);
         } else {
-//        loading notEndedCzasPracy
-            loadData(czasPracyApi);
+//        loading notEndedWorkTime
+            loadData(workTimeApi);
         }
     }
 
     /**
      * For loading data from server
-     * @param czasPracyApi
+     * @param workTimeApi
      */
-    private void loadData(CzasPracyApi czasPracyApi) {
+    private void loadData(WorkTimeApi workTimeApi) {
         startTime.setText(beginningOfWorkLabel);
         endTime.setText(endOfWorkLabel);
 
-        czasPracyApi.getNotEndedCzasPracy(activeEmployee.getId()).enqueue(new Callback<CzasPracy>() {
+        workTimeApi.getNotEndedWorkTime(activeEmployee.getId()).enqueue(new Callback<WorkTime>() {
 
             @Override
-            public void onResponse(Call<CzasPracy> call, Response<CzasPracy> response) {
+            public void onResponse(Call<WorkTime> call, Response<WorkTime> response) {
 //                if a body of a response is null no data was found
                 if (response.body() != null) {
                     clicked = true;
@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<CzasPracy> call, Throwable t) {
+            public void onFailure(Call<WorkTime> call, Throwable t) {
                 Log.d(MainActivity.class.getName(), t.getMessage());
                 makeToast(t.getMessage());
             }
@@ -118,23 +118,23 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * action on start of a shift button being pressed
-     * @param czasPracyApi
+     * @param workTimeApi
      */
-    private void onStartAction(CzasPracyApi czasPracyApi) {
+    private void onStartAction(WorkTimeApi workTimeApi) {
         activeEmployee = FileUtil.readFromFile(this, gson, FileUtil.FILE_NAME);
 //        behavior for start of work time
 //        setting up a flag
         clicked = true;
 //        setting text for the stop button
         startButton.setText(stopButtonText);
-//        creating CzasPracy
-        CzasPracy czasPracyToPost = new CzasPracy();
-        czasPracyToPost.setPracownikId(activeEmployee.getId());
-        czasPracyToPost.setBeginningOfWork(LocalDateTime.now());
-//        sending czas pracy to server
-        czasPracyApi.getNewCzasPracy(activeEmployee.getId()).enqueue(new Callback<CzasPracy>() {
+//        creating WorkTime
+        WorkTime workTimeToPost = new WorkTime();
+        workTimeToPost.setEmployeeId(activeEmployee.getId());
+        workTimeToPost.setBeginningOfWork(LocalDateTime.now());
+//        sending work time to server
+        workTimeApi.getNewWorkTime(activeEmployee.getId()).enqueue(new Callback<WorkTime>() {
             @Override
-            public void onResponse(Call<CzasPracy> call, Response<CzasPracy> response) {
+            public void onResponse(Call<WorkTime> call, Response<WorkTime> response) {
                 if (response.body() != null) {
 //                getting time from response
                     LocalDateTime dateTime = response.body().getBeginningOfWork();
@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<CzasPracy> call, Throwable t) {
+            public void onFailure(Call<WorkTime> call, Throwable t) {
                 Log.d(MainActivity.class.getName(), t.getMessage());
                 makeToast(t.getMessage());
             }
@@ -156,9 +156,9 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * action on end of a shift being pressed
-     * @param czasPracyApi
+     * @param workTimeApi
      */
-    private void onStopAction(CzasPracyApi czasPracyApi) {
+    private void onStopAction(WorkTimeApi workTimeApi) {
 //      behavior for end of work time
 //        loading active employee from file, double checking if everything is alright before ending shift
         activeEmployee = FileUtil.readFromFile(this, gson, FileUtil.FILE_NAME);
@@ -166,12 +166,12 @@ public class MainActivity extends AppCompatActivity {
         clicked = false;
         startButton.setText(startButtonText);
 //        loading data form data base and ending it(data is being receded for a situation when app is closed and started shift is forgotten)
-        czasPracyApi.getNotEndedCzasPracyAndEndIt(activeEmployee.getId()).enqueue(new Callback<CzasPracy>() {
+        workTimeApi.getNotEndedWorkTimeAndEndIt(activeEmployee.getId()).enqueue(new Callback<WorkTime>() {
             @Override
-            public void onResponse(Call<CzasPracy> call, Response<CzasPracy> response) {
+            public void onResponse(Call<WorkTime> call, Response<WorkTime> response) {
                 if (response.body() != null) {
-                    CzasPracy czasPracyEmployeeJustEnded = response.body();
-                    LocalDateTime endOfWork = czasPracyEmployeeJustEnded.getEndOfWork();
+                    WorkTime workTimeEmployeeJustEnded = response.body();
+                    LocalDateTime endOfWork = workTimeEmployeeJustEnded.getEndOfWork();
                     endTime.setText(getTime(endOfWork));
                 } else {
                     makeToast("Http: " + response.code());
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<CzasPracy> call, Throwable t) {
+            public void onFailure(Call<WorkTime> call, Throwable t) {
                 Log.d(MainActivity.class.getName(), t.getMessage());
                 makeToast(t.getMessage());
             }
@@ -213,10 +213,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        if employye is null it means it is not selected or loaded yet and data can not be loaded yet
+//        if employee is null it means it is not selected or loaded yet and data can not be loaded yet
         activeEmployee = FileUtil.readFromFile(this, gson, FileUtil.FILE_NAME);
         if (activeEmployee != null) {
-            loadData(czasPracyApi);
+            loadData(workTimeApi);
         }
     }
 }

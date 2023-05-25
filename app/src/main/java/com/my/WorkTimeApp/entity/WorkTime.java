@@ -5,11 +5,11 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-public class CzasPracy {
+public class WorkTime {
 
     private Long id;
 
-    private Long pracownikId;
+    private Long EmployeeId;
 
     
     private LocalDateTime beginningOfWork;
@@ -24,12 +24,12 @@ public class CzasPracy {
         this.id = id;
     }
 
-    public Long getPracownikId() {
-        return pracownikId;
+    public Long getEmployeeId() {
+        return EmployeeId;
     }
 
-    public void setPracownikId(Long pracownikId) {
-        this.pracownikId = pracownikId;
+    public void setEmployeeId(Long EmployeeId) {
+        this.EmployeeId = EmployeeId;
     }
 
     public LocalDateTime getBeginningOfWork() {

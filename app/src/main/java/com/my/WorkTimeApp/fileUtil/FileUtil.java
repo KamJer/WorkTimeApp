@@ -6,7 +6,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.my.WorkTimeApp.EmployeeSettingsActivity;
 import com.my.WorkTimeApp.MainActivity;
-import com.my.WorkTimeApp.entity.Pracownik;
+import com.my.WorkTimeApp.entity.Employee;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,9 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class FileUtil {
-    public static final String FILE_NAME = "pracownik_name.json";
+    public static final String FILE_NAME = "Employee_name.json";
 
-    public static void saveToFile(Context context, Gson gson, String fileName, Pracownik content) {
+    public static void saveToFile(Context context, Gson gson, String fileName, Employee content) {
         try {
 
             FileWriter writer = new FileWriter(context.getFilesDir() + "/" + fileName);
@@ -29,11 +29,11 @@ public class FileUtil {
         }
     }
 
-    public static Pracownik readFromFile(Context context, Gson gson, String fileName) {
+    public static Employee readFromFile(Context context, Gson gson, String fileName) {
         try {
             Reader reader = Files.newBufferedReader(Paths.get(context.getFilesDir() + "/" + fileName));
-            Pracownik pracownik = gson.fromJson(reader, Pracownik.class);
-            return pracownik;
+            Employee Employee = gson.fromJson(reader, Employee.class);
+            return Employee;
         } catch (Exception e) {
             Log.d(MainActivity.class.getName(), e.getMessage());
         }

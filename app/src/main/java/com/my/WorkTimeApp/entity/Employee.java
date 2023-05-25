@@ -2,7 +2,7 @@ package com.my.WorkTimeApp.entity;
 
 import java.util.Objects;
 
-public class Pracownik {
+public class Employee {
     private Long id;
     private String name;
     public Long getId() {
@@ -18,7 +18,7 @@ public class Pracownik {
             this.name = name;
         }
 
-    public Pracownik(String name) {
+    public Employee(String name) {
         this.name = name;
     }
 
@@ -32,11 +32,11 @@ public class Pracownik {
                 return true;
             }
 
-            if (!(obj instanceof Pracownik)) {
+            if (!(obj instanceof Employee)) {
                 return false;
             }
 
-            Pracownik other = (Pracownik) obj;
+            Employee other = (Employee) obj;
             return Objects.equals(id, other.id) && Objects.equals(name, other.name);
         }
 
